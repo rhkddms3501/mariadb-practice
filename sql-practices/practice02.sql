@@ -24,11 +24,11 @@ SELECT * FROM employees.dept_emp;
 -- select emp_no, from_date, to_date ,
 -- 	sum(
 -- 		if(
--- 			to_date = '9999-01-01',cast(date_format(now(), '%Y%m%d') as int) - cast(date_format(from_date, '%Y%m%d') as int) , cast(date_format(to_date, '%Y%m%d') as int) - cast(date_format(from_date, '%Y%m%d') as int)
+-- 			to_date = '9999-01-01', cast(date_format(now(), '%Y%m%d') as int) - cast(date_format(min(from_date), '%Y%m%d') as int) , cast(date_format(to_date, '%Y%m%d') as int) - cast(date_format(from_date, '%Y%m%d') as int)
 -- 			)
 -- 		) as '근속일'
 -- from dept_emp
--- group by emp_no
+-- group by emp_no 
 -- order by 근속일 desc;
 
 

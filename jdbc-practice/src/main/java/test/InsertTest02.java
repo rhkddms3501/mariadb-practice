@@ -21,7 +21,7 @@ public class InsertTest02 {
 			Class.forName("org.mariadb.jdbc.Driver");
 			
 			//2. 연결하기
-			String url = "jdbc:mariadb://192.168.10.125:3307/webdb?charset=utf8";
+			String url = "jdbc:mariadb://192.168.10.116:3307/webdb?charset=utf8";
 			conn = DriverManager.getConnection(url, "webdb", "webdb");
 			
 			//3. Statement 준비

@@ -1,4 +1,4 @@
-package emaillist.dao;
+package bookmall.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -8,14 +8,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import emaillist.vo.EmaillistVo;
+import bookmall.vo.CategoryVo;
 
+public class CategoryDao {
 
-
-public class EmaillistDao {
-
-	public List<EmaillistVo> findAll() {
-		List<EmaillistVo> result = new ArrayList<>();
+	public List<CategoryVo> findAll() {
+		List<CategoryVo> result = new ArrayList<>();
 	
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -24,20 +22,18 @@ public class EmaillistDao {
 		try {
 			conn = getConnection();
 			
-			String sql ="select no, first_name, last_name, email from emaillist order by no desc";
+			String sql =
+						"select no, type from category";
 			pstmt = conn.prepareStatement(sql);
-
 			rs = pstmt.executeQuery();
+			
 			while(rs.next()) {
-				EmaillistVo vo = new EmaillistVo();
+				CategoryVo vo = new CategoryVo();
 				vo.setNo(rs.getLong(1));
-				vo.setFirstName(rs.getString(2));
-				vo.setLastName(rs.getString(3));
-				vo.setEmail(rs.getString(4));
+				vo.setType(rs.getString(2));
 				
 				result.add(vo);
 			}
-			
 		} catch (SQLException e) {
 			System.out.println("error:" + e);
 		} finally {
@@ -57,56 +53,23 @@ public class EmaillistDao {
 				e.printStackTrace();
 			}
 		}
-		
 		return result;
 	}
 
-	public void insert(EmaillistVo vo) {
+	public void insert(CategoryVo vo) {
+		
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		
 		try {
 			conn = getConnection();
 			
-			String sql = "insert into emaillist values(null, ?, ?, ?)";
+			String sql = " insert into category values (null, ?)";
 			pstmt = conn.prepareStatement(sql);
 			
-			pstmt.setString(1, vo.getFirstName());
-			pstmt.setString(2, vo.getLastName());
-			pstmt.setString(3, vo.getEmail());
-			
+			pstmt.setString(1, vo.getType());
 			pstmt.executeUpdate();
 			
-		} catch (SQLException e) {
-			System.out.println("error:" + e);
-		} finally {
-			try {
-				if(pstmt != null) {
-					pstmt.close();
-				}
-				
-				if(conn != null) {
-					conn.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	public void deleteByEmail(String email) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		
-		try {
-			conn = getConnection();
-			
-			String sql = "delete from emaillist where email = ?";
-			pstmt = conn.prepareStatement(sql);
-			
-			pstmt.setString(1, email);
-			
-			pstmt.executeUpdate();
 		} catch (SQLException e) {
 			System.out.println("error:" + e);
 		} finally {
@@ -129,12 +92,11 @@ public class EmaillistDao {
 		
 		try {
 			Class.forName("org.mariadb.jdbc.Driver");
-			String url = "jdbc:mariadb://192.168.10.116:3307/webdb?charset=utf8";
-			conn = DriverManager.getConnection(url, "webdb", "webdb");
+			String url = "jdbc:mariadb://192.168.10.116:3307/bookmall?charset=utf8";
+			conn = DriverManager.getConnection(url, "bookmall", "bookmall");
 		} catch (ClassNotFoundException e) {
 			System.out.println("드라이버 로딩 실패:" + e);
 		}
-		
 		return conn;
 	}
 }

@@ -1,4 +1,4 @@
-package emaillist.dao;
+package bookmall.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -8,14 +8,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import emaillist.vo.EmaillistVo;
+import bookmall.vo.OrdersVo;
 
 
-
-public class EmaillistDao {
-
-	public List<EmaillistVo> findAll() {
-		List<EmaillistVo> result = new ArrayList<>();
+public class OrdersDao {
+	public List<OrdersVo> findAll(Long no) {
+		List<OrdersVo> result = new ArrayList<>();
 	
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -24,20 +22,23 @@ public class EmaillistDao {
 		try {
 			conn = getConnection();
 			
-			String sql ="select no, first_name, last_name, email from emaillist order by no desc";
+			String sql =
+						"select b.no, a.no, a.name, a.email, b.price, b.address from user a join orders b on a.no = b.user_no where a.no = ?";
 			pstmt = conn.prepareStatement(sql);
-
+			pstmt.setLong(1, no);
 			rs = pstmt.executeQuery();
+			
 			while(rs.next()) {
-				EmaillistVo vo = new EmaillistVo();
+				OrdersVo vo = new OrdersVo();
 				vo.setNo(rs.getLong(1));
-				vo.setFirstName(rs.getString(2));
-				vo.setLastName(rs.getString(3));
-				vo.setEmail(rs.getString(4));
+				vo.setUserNo(rs.getLong(2));
+				vo.setUserName(rs.getString(3));
+				vo.setUserEmail(rs.getString(4));
+				vo.setPrice(rs.getLong(5));
+				vo.setAddress(rs.getString(6));
 				
 				result.add(vo);
 			}
-			
 		} catch (SQLException e) {
 			System.out.println("error:" + e);
 		} finally {
@@ -57,56 +58,31 @@ public class EmaillistDao {
 				e.printStackTrace();
 			}
 		}
-		
 		return result;
 	}
 
-	public void insert(EmaillistVo vo) {
+	public void insert(OrdersVo vo) {
+		
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		
 		try {
 			conn = getConnection();
 			
-			String sql = "insert into emaillist values(null, ?, ?, ?)";
+			String sql = " insert into orders values(null, ("
+					+ "									select sum(a.count * b.price)"
+					+ "									from cart a join book b join user c"
+					+ "									on a.book_no = b.no"
+					+ "									and a.user_no = c.no"
+					+ "									where a.user_no = ?"
+					+ "									), ?, ?)";
 			pstmt = conn.prepareStatement(sql);
 			
-			pstmt.setString(1, vo.getFirstName());
-			pstmt.setString(2, vo.getLastName());
-			pstmt.setString(3, vo.getEmail());
-			
+			pstmt.setLong(1, vo.getUserNo());
+			pstmt.setString(2, vo.getAddress());
+			pstmt.setLong(3, vo.getUserNo());
 			pstmt.executeUpdate();
 			
-		} catch (SQLException e) {
-			System.out.println("error:" + e);
-		} finally {
-			try {
-				if(pstmt != null) {
-					pstmt.close();
-				}
-				
-				if(conn != null) {
-					conn.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	public void deleteByEmail(String email) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		
-		try {
-			conn = getConnection();
-			
-			String sql = "delete from emaillist where email = ?";
-			pstmt = conn.prepareStatement(sql);
-			
-			pstmt.setString(1, email);
-			
-			pstmt.executeUpdate();
 		} catch (SQLException e) {
 			System.out.println("error:" + e);
 		} finally {
@@ -129,12 +105,11 @@ public class EmaillistDao {
 		
 		try {
 			Class.forName("org.mariadb.jdbc.Driver");
-			String url = "jdbc:mariadb://192.168.10.116:3307/webdb?charset=utf8";
-			conn = DriverManager.getConnection(url, "webdb", "webdb");
+			String url = "jdbc:mariadb://192.168.10.116:3307/bookmall?charset=utf8";
+			conn = DriverManager.getConnection(url, "bookmall", "bookmall");
 		} catch (ClassNotFoundException e) {
 			System.out.println("드라이버 로딩 실패:" + e);
 		}
-		
 		return conn;
 	}
 }
